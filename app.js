@@ -1,8 +1,7 @@
 const tabExposants = [128,64,32,16,8,4,2,1];
-
-POSITIVE = true;
-NEGATIVE = false;
-let signe = POSITIVE;
+let sign;
+const POSITIVE = 0;
+const NEGATIVE = 1;
 
 function integerToBinary(integer) {
     let output = [];
@@ -31,12 +30,13 @@ function decimalToBinary({decimal}){
     }
     return output;
 }
-function exposant({integerBinary}){
+
+function exponant({binaryInteger}){
     let i = 0;
-    while(integerBinary[i] != 1){
+    while(binaryInteger[i] != 1){
         i ++;
     }
-    return integerBinary.length - (i + 1);
+    return binaryInteger.length - (i + 1);
 }
 
 function splitter(input){
@@ -63,7 +63,7 @@ function to32Bit(array){
     return array;
 }
 
-function check(){
+function checking(){
     let input = document.getElementById("input");
     if(input.value.includes(",")){
         alert("Wrong input, please use the British's convention instead.");
@@ -75,9 +75,9 @@ function check(){
         input.value = "";
     }else{
         let value = input.value;
-        signe = POSITIVE;
+        sign = POSITIVE;
         if(value[0] == "-"){
-            signe = NEGATIVE;
+            sign = NEGATIVE;
             value = input.value.substring(1);
         }
         calculate(value);
@@ -107,28 +107,27 @@ window.onload = function() {
 
 function calculate(input){
     vf = splitter(input);
-    vf.integerBinary = integerToBinary(vf.integer);
-    vf.decimalBinary = decimalToBinary(vf);
-    vf.exposant = exposant(vf);
-    vf.exposantPolarise = vf.exposant + 127;
-    vf.exposantToBinary = integerToBinary(vf.exposantPolarise);
-
+    vf.binaryInteger = integerToBinary(vf.integer);
+    vf.binaryDecimal = decimalToBinary(vf);
+    vf.polarisedExponant = exponant(vf) + 127;
+    vf.binaryExponant = integerToBinary(vf.polarisedExponant);
+    
     console.log("Voici les données à ce jour : ");
     console.log(vf);
     console.log("Il ne reste qu'a s'occuper du resultat.");
-    vf.resultat = [];
-    vf.resultat.unshift(signe ? 0 : 1);
-    console.log(`Creer la réponse en rajoutant d'abord 0 : ${vf.resultat}`);
-    vf.resultat = vf.resultat.concat(vf.exposantToBinary);
-    console.log(`Rajout de la partie exposant : ${vf.resultat}`);
-    let temp = cutIntegerDecimalFromFirst1(vf.integerBinary);
-    vf.resultat = vf.resultat.concat(temp);
-    console.log(`Rajout de la partie "integer" : ${vf.resultat}`);
-    vf.resultat = vf.resultat.concat(vf.decimalBinary);
-    console.log(`Rajout de la partie "decimal" : ${vf.resultat}`);
-    vf.resultat = to32Bit(vf.resultat);
-    console.log(`Ajustement pour 32 bits : ${vf.resultat}`);
-    let answer = vf.resultat.join("");
+    vf.result = [];
+    vf.result.unshift(sign);
+    console.log(`Creer la réponse en rajoutant d'abord 0 : ${vf.result}`);
+    vf.result = vf.result.concat(vf.binaryExponant);
+    console.log(`Rajout de la partie exposant : ${vf.result}`);
+    let temp = cutIntegerDecimalFromFirst1(vf.binaryInteger);
+    vf.result = vf.result.concat(temp);
+    console.log(`Rajout de la partie "integer" : ${vf.result}`);
+    vf.result = vf.result.concat(vf.binaryDecimal);
+    console.log(`Rajout de la partie "decimal" : ${vf.result}`);
+    vf.result = to32Bit(vf.result);
+    console.log(`Ajustement pour 32 bits : ${vf.result}`);
+    let answer = vf.result.join("");
     answer = dividedBy4Section(answer);
     document.getElementById("answer").innerText = answer;
 }
